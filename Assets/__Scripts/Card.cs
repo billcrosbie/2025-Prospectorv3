@@ -41,6 +41,8 @@ public class Card : MonoBehaviour
 
         // Build the card from Sprites
         AddDecorators();
+        AddPips();
+        AddFace();
 
     }
 
@@ -104,5 +106,62 @@ public class Card : MonoBehaviour
             // Add this decorator GameObject to the List card.decoGOs
             decoGOs.Add(_tGO);
         }
+    }
+
+    /// <summary>
+    /// Adds pips to the front of all cards from A to 10
+    /// </summary>
+    private void AddPips()
+    {
+        int pipNum = 0;
+        // For each of the pips in the definition...
+        foreach (JsonPip pip in def.pips)
+        {                                   // b
+                                            // Instantiate a GameObject from the Deck.SPRITE_PREFAB static field
+            _tGO = Instantiate<GameObject>(Deck.SPRITE_PREFAB, transform);
+            // Set the position to that specified in the JSON
+            _tGO.transform.localPosition = pip.loc;
+            // Flip it if necessary
+            if (pip.flip) _tGO.transform.rotation = _flipRot;
+            // Scale it if necessary (only for the Ace)
+            if (pip.scale != 1)
+            {
+                _tGO.transform.localScale = Vector3.one * pip.scale;
+            }
+            // Give this GameObject a name
+            _tGO.name = "pip_" + pipNum++;                                      // c
+                                                                                // Get the SpriteRenderer Component
+            _tSRend = _tGO.GetComponent<SpriteRenderer>();
+            // Set the Sprite to the proper suit
+            _tSRend.sprite = CardSpritesSO.SUITS[suit];
+            // sortingOrder=1 renders this pip above the Card_Front
+            _tSRend.sortingOrder = 1;
+            // Add this to the Card’s list of pips
+            pipGOs.Add(_tGO);
+        }
+    }
+
+    /// <summary>
+    /// Adds the face sprite for card ranks 11 to 13
+    /// </summary>
+    private void AddFace()
+    {
+        if (def.face == "")
+            return;// No need to run if this isn’t a face card
+
+        // Find a face sprite in CardSpritesSO with the right name
+        string faceName = def.face + suit;                                   // b
+        _tSprite = CardSpritesSO.GET_FACE(faceName);                       // c
+        if (_tSprite == null)
+        {
+            Debug.LogError("Face sprite " + faceName + " not found.");
+            return;
+        }
+        _tGO = Instantiate<GameObject>(Deck.SPRITE_PREFAB, transform);     // d
+        _tSRend = _tGO.GetComponent<SpriteRenderer>();
+        _tSRend.sprite = _tSprite;// Assign the face Sprite to _tSRend
+        _tSRend.sortingOrder = 1;// Set the sortingOrder
+        _tGO.transform.localPosition = Vector3.zero;
+        _tGO.name = faceName;
     }
 }

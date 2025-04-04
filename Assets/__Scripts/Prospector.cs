@@ -209,7 +209,20 @@ public class Prospector : MonoBehaviour
                 S.UpdateDrawPile();          // Restack the drawPile
                 break;
             case eCardState.mine:
-                // More to come here
+                // Clicking a card in the mine will check if it’s a valid play
+                bool validMatch = true;  // Initially assume that it’s valid 
+
+                // If the card is face-down, it’s not valid
+                if (!cp.faceUp) validMatch = false;
+
+                // If it’s not an adjacent rank, it’s not valid
+                if (!cp.AdjacentTo(S.target)) validMatch = false;            // b
+
+                if (validMatch)
+                {        // If it’s a valid card
+                    S.mine.Remove(cp);   // Remove it from the tableau List
+                    S.MoveToTarget(cp);  // Make it the target card
+                }
                 break;
         }
     }
